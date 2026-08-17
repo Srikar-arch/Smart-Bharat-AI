@@ -171,33 +171,46 @@ Here is the structured guide regarding your query: **"${message}"**.
       }
     }
 
-    // Save/Sync Chat session in MongoDB User Document
-    const user = req.user;
-    const activeChatId = chatId || `chat_${Date.now()}`;
-    const existingIndex = user.savedChats.findIndex(c => c.chatId === activeChatId);
+    // Save/Sync Chat session in MongoDB User Document (graceful)
+    try {
+      const user = req.user;
+      const activeChatId = chatId || `chat_${Date.now()}`;
+      
+      if (user && user.savedChats && typeof user.save === 'function') {
+        const existingIndex = user.savedChats.findIndex(c => c.chatId === activeChatId);
 
-    const newUserMsg = { role: 'user', content: message, timestamp: new Date() };
-    const newAiMsg = { role: 'model', content: text, timestamp: new Date() };
+        const newUserMsg = { role: 'user', content: message, timestamp: new Date() };
+        const newAiMsg = { role: 'model', content: text, timestamp: new Date() };
 
-    if (existingIndex > -1) {
-      user.savedChats[existingIndex].messages.push(newUserMsg, newAiMsg);
-    } else {
-      const title = message.slice(0, 32) + (message.length > 32 ? '...' : '');
-      user.savedChats.push({
-        chatId: activeChatId,
-        title,
-        messages: [newUserMsg, newAiMsg],
-        createdAt: new Date()
+        if (existingIndex > -1) {
+          user.savedChats[existingIndex].messages.push(newUserMsg, newAiMsg);
+        } else {
+          const title = message.slice(0, 32) + (message.length > 32 ? '...' : '');
+          user.savedChats.push({
+            chatId: activeChatId,
+            title,
+            messages: [newUserMsg, newAiMsg],
+            createdAt: new Date()
+          });
+        }
+
+        await user.save();
+      }
+
+      res.json({
+        message: text,
+        chatId: chatId || `chat_${Date.now()}`,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (saveErr) {
+      // DB save failed, but still return the AI response to the user
+      console.warn('Chat DB sync failed:', saveErr.message);
+      res.json({
+        message: text,
+        chatId: chatId || `chat_${Date.now()}`,
+        timestamp: new Date().toISOString(),
       });
     }
-
-    await user.save();
-
-    res.json({
-      message: text,
-      chatId: activeChatId,
-      timestamp: new Date().toISOString(),
-    });
   } catch (error) {
     console.error('AI Chat error:', error);
     res.status(500).json({

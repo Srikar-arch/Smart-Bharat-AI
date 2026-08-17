@@ -19,19 +19,39 @@ export const authenticate = async (req, res, next) => {
       const demoEmail = token === 'demo-token' ? 'demo@smartbharat.ai' : 'offline@smartbharat.ai';
       const role = demoEmail.includes('admin') ? 'admin' : 'user';
 
-      let user = await User.findOne({ email: demoEmail });
-      if (!user) {
-        user = await User.create({
+      try {
+        let user = await User.findOne({ email: demoEmail });
+        if (!user) {
+          user = await User.create({
+            email: demoEmail,
+            displayName: 'Arjun Sharma',
+            uid: 'demo-uid-001',
+            role: role,
+            state: 'Maharashtra',
+            district: 'Pune',
+            language: 'en'
+          });
+        }
+        req.user = user;
+      } catch (dbErr) {
+        // MongoDB is offline — use an in-memory mock user so routes still work
+        console.warn('Auth: DB unavailable, using in-memory mock user');
+        req.user = {
+          _id: 'mock-user-id',
           email: demoEmail,
           displayName: 'Arjun Sharma',
           uid: 'demo-uid-001',
           role: role,
           state: 'Maharashtra',
           district: 'Pune',
-          language: 'en'
-        });
+          language: 'en',
+          savedChats: [],
+          bookmarks: [],
+          savedComplaints: [],
+          recommendedSchemes: [],
+          save: async () => {} // no-op
+        };
       }
-      req.user = user;
       return next();
     }
 

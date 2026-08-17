@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import {
   HiUser, HiMail, HiPhone, HiLocationMarker, HiPencil,
@@ -48,6 +48,7 @@ const Profile = () => {
   const { lang, setLang } = useLanguage();
   const [editing, setEditing] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
+  const fileInputRef = useRef(null);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [form, setForm] = useState({
     displayName: user?.displayName || 'Arjun Sharma',
@@ -97,7 +98,8 @@ const Profile = () => {
             <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 mb-4">
               <div className="relative">
                 <Avatar name={form.displayName} size="2xl" className="ring-4 ring-white dark:ring-dark-card" />
-                <button className="absolute bottom-0 right-0 w-8 h-8 bg-saffron-500 rounded-full flex items-center justify-center shadow-lg hover:bg-saffron-600 transition-colors">
+                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" />
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="absolute bottom-0 right-0 w-8 h-8 bg-saffron-500 rounded-full flex items-center justify-center shadow-lg hover:bg-saffron-600 transition-colors">
                   <HiCamera className="w-4 h-4 text-white" />
                 </button>
               </div>

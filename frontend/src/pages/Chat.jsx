@@ -253,13 +253,29 @@ Ask me a question or click one of the suggested prompts below to get started. I 
         }
       }
     } catch (err) {
-      error("Failed to connect to AI Assistant. Using offline simulation.");
+      error("Using offline mode — limited responses available.");
       // Simulated Fallback
       await new Promise(r => setTimeout(r, 1000));
+      
+      const lowerQuery = query.toLowerCase();
+      let fallbackContent = '';
+      
+      if (lowerQuery.includes('passport')) {
+        fallbackContent = `### Passport Application Guide (Offline Mode)\n\nTo apply for a passport:\n1. Register on the [Passport Seva Portal](https://portal2.passportindia.gov.in)\n2. Login and click "Apply for Fresh Passport/Re-issue of Passport"\n3. Fill the online form and submit\n4. Pay the fee and schedule an appointment\n5. Visit the Passport Seva Kendra (PSK) with original documents`;
+      } else if (lowerQuery.includes('aadhaar')) {
+        fallbackContent = `### Aadhaar Update Guide (Offline Mode)\n\nTo update your Aadhaar card:\n- **Online:** Address can be updated via the [myAadhaar portal](https://myaadhaar.uidai.gov.in) using OTP.\n- **Offline:** Visit an Aadhaar Enrolment Center for biometric, mobile number, or name changes.`;
+      } else if (lowerQuery.includes('pm awas') || lowerQuery.includes('housing')) {
+        fallbackContent = `### PM Awas Yojana (Offline Mode)\n\nThe Pradhan Mantri Awas Yojana (PMAY) provides affordable housing.\n- Apply online via [pmaymis.gov.in](https://pmaymis.gov.in)\n- Requires Aadhaar card, income proof, and bank details.\n- Subsidized interest rates available for low-income groups.`;
+      } else if (lowerQuery.includes('ayushman') || lowerQuery.includes('health')) {
+        fallbackContent = `### Ayushman Bharat Scheme (Offline Mode)\n\nProvides health cover of up to ₹5 lakhs per family per year.\n- Check eligibility at [mera.pmjay.gov.in](https://mera.pmjay.gov.in)\n- Covers secondary and tertiary care hospitalization.\n- Carry your Ayushman Card or Aadhaar to empanelled hospitals.`;
+      } else {
+        fallbackContent = `### Government Services Guide (Offline Mode)\n\nI am currently operating in offline mode. Please verify your internet connection or check official portals:\n- [MyGov.in](https://www.mygov.in) for citizen engagement\n- [India.gov.in](https://www.india.gov.in) for National Portal of India\n- [Digital India](https://www.digitalindia.gov.in) for digital services`;
+      }
+
       const aiMessage = {
         id: Math.random().toString(),
         role: 'assistant',
-        content: `I apologize, the AI service encountered an error. Please verify your internet connection or check official government portals like [mygov.in](https://www.mygov.in) directly.`,
+        content: fallbackContent,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, aiMessage]);
@@ -448,8 +464,12 @@ Ask me a question or click one of the suggested prompts below to get started. I 
               </button>
             ))
           ) : (
-            <div className="text-center py-8 text-xs text-gray-400">
-              No saved conversations found.
+            <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
+              <div className="w-12 h-12 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-3">
+                <HiOutlineChat className="w-6 h-6 text-gray-400" />
+              </div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">No conversations yet</p>
+              <p className="text-xs text-gray-400">Start a new chat to begin</p>
             </div>
           )}
         </div>

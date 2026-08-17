@@ -41,7 +41,7 @@ const ComplaintNew = () => {
   const [priority, setPriority] = useState('medium');
   const [loading, setLoading] = useState(false);
   const [createdComplaintId, setCreatedComplaintId] = useState('SB-2026-0001');
-  const { success } = useNotification();
+  const { success, error } = useNotification();
   const navigate = useNavigate();
 
   const [mapLoaded, setMapLoaded] = useState(false);
@@ -225,9 +225,11 @@ const ComplaintNew = () => {
       }
     } catch (err) {
       console.error(err);
-      setSubmitted(true);
-      success('Complaint filed successfully!');
-      setTimeout(() => navigate('/complaints'), 5000);
+      if (error) {
+        error('Failed to submit complaint. Please try again later.');
+      } else {
+        alert('Failed to submit complaint. Please try again later.');
+      }
     } finally {
       setLoading(false);
     }

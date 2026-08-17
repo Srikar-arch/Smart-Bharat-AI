@@ -156,7 +156,7 @@ const RecommendationCard = ({ scheme, index, onBookmark, isBookmarked }) => {
 
 const Schemes = () => {
   const { user } = useAuth();
-  const { success, info } = useNotification();
+  const { success, info, error } = useNotification();
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const [showWizard, setShowWizard] = useState(false);
@@ -217,13 +217,10 @@ const Schemes = () => {
         success("Scheme bookmarked successfully!");
       }
     } catch (err) {
-      // Local fallback
-      if (isBookmarked) {
-        setBookmarks(prev => prev.filter(b => b !== schemeName));
-        success("Scheme removed from bookmarks!");
+      if (error) {
+        error("Failed to update bookmark.");
       } else {
-        setBookmarks(prev => [...prev, schemeName]);
-        success("Scheme bookmarked successfully!");
+        alert("Failed to update bookmark.");
       }
     }
   };
@@ -257,22 +254,11 @@ const Schemes = () => {
         success("Personalized scheme list generated!");
       }
     } catch (err) {
-      info("Error connecting to matching engine. Displaying offline matches.");
-      // Fallback matching
-      const matches = [...PRESET_SCHEMES];
-      if (farmer) {
-        matches.unshift({
-          name: "PM-KISAN Samman Nidhi",
-          description: "Direct cash transfer program providing financial assistance to all landholder farmer families.",
-          benefits: "₹6,000 per year paid in three equal installments.",
-          eligibility: "All small and marginal landholding farmer families across India.",
-          documentsRequired: ['Aadhaar Card', 'Land ownership records/Patta', 'Bank Account details'],
-          howToApply: "Register online via PM-Kisan portal or CSC nodes.",
-          applicationLink: "https://pmkisan.gov.in",
-          deadline: "Ongoing"
-        });
+      if (error) {
+        error("Failed to find personalized schemes. Please try again.");
+      } else {
+        alert("Failed to find personalized schemes. Please try again.");
       }
-      setRecommendations(matches);
     } finally {
       setLoading(false);
     }

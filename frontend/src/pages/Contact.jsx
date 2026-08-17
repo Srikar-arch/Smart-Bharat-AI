@@ -8,6 +8,7 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { useNotification } from '@/contexts/NotificationContext';
+import { useNavigate } from 'react-router-dom';
 
 const CONTACT_OPTIONS = [
   { icon: HiPhone, label: 'Toll-Free', value: '1800-SMART-AI', desc: '24/7 support', color: 'text-green-500', bg: 'bg-green-100 dark:bg-green-900/30' },
@@ -21,6 +22,7 @@ const Contact = () => {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const { success } = useNotification();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -164,7 +166,7 @@ const Contact = () => {
               <div className="text-3xl mb-3">🤖</div>
               <h3 className="font-bold text-gray-900 dark:text-white mb-2">Try AI Chat First!</h3>
               <p className="text-sm text-gray-500 mb-4">Get instant answers from our AI before contacting support.</p>
-              <Button variant="outline" size="sm" fullWidth>Open AI Chat</Button>
+              <Button variant="outline" size="sm" fullWidth onClick={() => navigate('/chat')}>Open AI Chat</Button>
             </Card>
           </motion.div>
         </div>
